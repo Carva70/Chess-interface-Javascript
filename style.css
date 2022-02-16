@@ -3,6 +3,7 @@ body {
     width: 100%;
     margin-top: 0;
     margin-left: 0;
+    margin-bottom: 0;
 }
 
 .board {
@@ -22,16 +23,14 @@ body {
 }
 
 .black {
-    background-color: rgb(122, 122, 122);
-    color: white;
+    background-color: rgb(181, 136, 99);
 }
 
 .white {
-    background-color: #ccc;
+    background-color: rgb(240, 217, 181);
 }
 
 .image {
     height: 100%;
     width: 100%;
-    
 }

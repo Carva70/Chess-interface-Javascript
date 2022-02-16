@@ -11,6 +11,11 @@ export class Board {
 
         this.next = 'w'
         this.isAux = isAux
+        this.castleWS = 1
+        this.castleWL = 1
+        this.castleBS = 1
+        this.castleBL = 1
+        this.enPessant = ''
     }
 
     drawBoard(display) {
@@ -41,6 +46,31 @@ export class Board {
     move(p1, p2, display) {
         this.position[p2[0]][p2[1]] = this.position[p1[0]][p1[1]]
         this.position[p1[0]][p1[1]] = ' '
+
+        if (this.position[p2[0]][p2[1]] == 'K' && (p2[1] - p1[1]) == 2) {
+            this.position[7][5] = this.position[7][7]
+            this.position[7][7] = ' '
+            this.castleWS = 0
+        }
+
+        if (this.position[p2[0]][p2[1]] == 'K' && (p1[1] - p2[1]) == 2) {
+            this.position[7][3] = this.position[7][0]
+            this.position[7][0] = ' '
+            this.castleWL = 0
+        }
+
+        if (this.position[p2[0]][p2[1]] == 'k' && (p2[1] - p1[1]) == 2) {
+            this.position[0][5] = this.position[0][7]
+            this.position[0][7] = ' '
+            this.castleBS = 0
+        }
+
+        if (this.position[p2[0]][p2[1]] == 'k' && (p1[1] - p2[1]) == 2) {
+            this.position[0][3] = this.position[0][0]
+            this.position[0][0] = ' '
+            this.castleBL = 0
+        }
+
         this.drawBoard(display)
 
         if (this.next == 'w') this.next = 'b'
@@ -348,6 +378,13 @@ export class Board {
                 if (v[0]+1<= 7 && v[1]+1<=7) if (this.color(this.position[v[0]+1][v[1]+1]) != 1) result.push([[v[0]+1,v[1]+1], this.position[v[0]+1][v[1]+1]])
                 if (v[0]-1>= 0 && v[1]-1>=0) if (this.color(this.position[v[0]-1][v[1]-1]) != 1) result.push([[v[0]-1,v[1]-1], this.position[v[0]-1][v[1]-1]])
 
+                if (v[0] == 7 && v[1] == 4 && this.position[7][5] == ' ' && this.position[7][6] == ' ' && this.position[7][7] == 'R' && this.castleWS == 1)
+                    result.push([[7,6], ' '])
+                
+                if (v[0] == 7 && v[1] == 4 && this.position[7][3] == ' ' && this.position[7][2] == ' ' && this.position[7][1] == ' ' && this.position[7][0] == 'R' && this.castleWL == 1)
+                    result.push([[7,2], ' '])
+                
+
                 break
 
             case 'k':
@@ -361,6 +398,13 @@ export class Board {
                 if (v[0]+1<= 7 && v[1]+1<=7) if (this.color(this.position[v[0]+1][v[1]+1]) != 2) result.push([[v[0]+1,v[1]+1], this.position[v[0]+1][v[1]+1]])
                 if (v[0]-1>= 0 && v[1]-1>=0) if (this.color(this.position[v[0]-1][v[1]-1]) != 2) result.push([[v[0]-1,v[1]-1], this.position[v[0]-1][v[1]-1]])
 
+                if (v[0] == 0 && v[1] == 4 && this.position[0][5] == ' ' && this.position[0][6] == ' ' && this.position[0][7] == 'r' && this.castleBS == 1) 
+                    result.push([[0,6], ' '])
+
+                if (v[0] == 0 && v[1] == 4 && this.position[0][3] == ' ' && this.position[0][2] == ' ' && this.position[0][1] == ' ' && this.position[0][0] == 'r' && this.castleBL == 1)
+                    result.push([[0,2], ' '])
+
+
             }
         var final = []
         var auxBoard = new Board(1)
@@ -369,10 +413,9 @@ export class Board {
         if (this.isAux == 0) {
             for (var ind in result) {
                 
-                for (var indk in this.position) {
+                for (var indk in this.position)
                     auxBoard.position[indk] = this.position[indk].slice()
-                    
-                }
+                
                 auxBoard.moveAux(v, result[ind][0])
                 if (this.next == 'w') auxBoard.next = 'b'
                 else auxBoard.next = 'w'
@@ -386,9 +429,9 @@ export class Board {
                             
                             for (var l in checkSucc) {
                                 
-                                if ((c == 1 && checkSucc[l][1] == 'k') || (c == 2 && checkSucc[l][1] == 'K')) {
+                                if ((c == 1 && checkSucc[l][1] == 'k') || (c == 2 && checkSucc[l][1] == 'K'))
                                     flag = 1
-                                }
+                                
                             }
                         }
                         
