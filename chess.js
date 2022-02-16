@@ -1,5 +1,5 @@
 export class Board {
-    constructor() {
+    constructor(isAux = 0) {
         this.position = [['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'], 
                          ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
                          [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -10,6 +10,7 @@ export class Board {
                          ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']]
 
         this.next = 'w'
+        this.isAux = isAux
     }
 
     drawBoard(display) {
@@ -46,6 +47,14 @@ export class Board {
         else this.next = 'w'
     }
 
+    moveAux(p1, p2) {
+        this.position[p2[0]][p2[1]] = this.position[p1[0]][p1[1]]
+        this.position[p1[0]][p1[1]] = ' '
+
+        if (this.next == 'w') this.next = 'b'
+        else this.next = 'w'
+    }
+
     color(piece) {
         if (piece == ' ') return 0
         if (piece == piece.toUpperCase()) return 1
@@ -66,11 +75,12 @@ export class Board {
                     if (v[0] == 6 && this.position[v[0]-2][v[1]] == ' ')
                         result.push([[v[0]-2,v[1]], ' '])
                 }
-                
-                if (this.color(this.position[v[0]-1][v[1]-1]) == 2)
-                    result.push([[v[0]-1,v[1]-1], this.position[v[0]-1][v[1]-1]])
-                if (this.color(this.position[v[0]-1][v[1]+1]) == 2)
-                    result.push([[v[0]-1,v[1]+1], this.position[v[0]-1][v[1]+1]])
+                if (v[0]-1>=0 && v[1]-1>=0)
+                    if (this.color(this.position[v[0]-1][v[1]-1]) == 2)
+                        result.push([[v[0]-1,v[1]-1], this.position[v[0]-1][v[1]-1]])
+                if (v[0]-1>=0 && v[1]+1<=7)
+                    if (this.color(this.position[v[0]-1][v[1]+1]) == 2)
+                        result.push([[v[0]-1,v[1]+1], this.position[v[0]-1][v[1]+1]])
                 
                 break
             
@@ -82,10 +92,12 @@ export class Board {
                         result.push([[v[0]+2,v[1]], ' '])
                 }
                 
-                if (this.color(this.position[v[0]+1][v[1]+1]) == 1)
-                    result.push([[v[0]+1,v[1]+1], this.position[v[0]+1][v[1]+1]])
-                if (this.color(this.position[v[0]+1][v[1]-1]) == 1)
-                    result.push([[v[0]+1,v[1]-1], this.position[v[0]+1][v[1]-1]])
+                if (v[0]+1<=7 && v[1]+1<=7)
+                    if (this.color(this.position[v[0]+1][v[1]+1]) == 1)
+                        result.push([[v[0]+1,v[1]+1], this.position[v[0]+1][v[1]+1]])
+                if (v[0]+1<=7 && v[1]-1>=0)
+                    if (this.color(this.position[v[0]+1][v[1]-1]) == 1)
+                        result.push([[v[0]+1,v[1]-1], this.position[v[0]+1][v[1]-1]])
                 
                 break
 
@@ -350,7 +362,43 @@ export class Board {
                 if (v[0]-1>= 0 && v[1]-1>=0) if (this.color(this.position[v[0]-1][v[1]-1]) != 2) result.push([[v[0]-1,v[1]-1], this.position[v[0]-1][v[1]-1]])
 
             }
-
+        var final = []
+        var auxBoard = new Board(1)
+        var flag
+        
+        if (this.isAux == 0) {
+            for (var ind in result) {
+                
+                for (var indk in this.position) {
+                    auxBoard.position[indk] = this.position[indk].slice()
+                    
+                }
+                auxBoard.moveAux(v, result[ind][0])
+                if (this.next == 'w') auxBoard.next = 'b'
+                else auxBoard.next = 'w'
+                flag = 0
+                for (var i = 0; i < 8; i++) {
+                    for (var j = 0; j < 8; j++) {
+                        var c = this.color(auxBoard.position[i][j])
+                        
+                        if (((c == 1) && (auxBoard.next == 'w')) || ((c == 2) && (auxBoard.next == 'b'))) {
+                            var checkSucc = auxBoard.getSuccesors([i, j])
+                            
+                            for (var l in checkSucc) {
+                                
+                                if ((c == 1 && checkSucc[l][1] == 'k') || (c == 2 && checkSucc[l][1] == 'K')) {
+                                    flag = 1
+                                }
+                            }
+                        }
+                        
+                    }
+                }
+                if (flag == 0)
+                    final.push(result[ind])
+            }
+            return final
+        }
         return result
         }
 }
