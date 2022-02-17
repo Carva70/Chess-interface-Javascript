@@ -27,9 +27,12 @@ document.addEventListener("dragover", function(event) {
 document.addEventListener("dragend", function(event) {
 
     var succ = board.getSuccesors(drag)
+    //console.log(succ)
 
     for (var i in succ) {
-        if (succ[i][0][0] == drop[0] && succ[i][0][1] == drop[1]) board.move(drag, drop, display)
+        if (succ[i][0][0] == drop[0] && succ[i][0][1] == drop[1]) {
+            board.move(drag, drop, display, succ[i][2])
+        }
     }
 
     

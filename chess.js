@@ -15,7 +15,7 @@ export class Board {
         this.castleWL = 1
         this.castleBS = 1
         this.castleBL = 1
-        this.enPessant = ''
+        this.enPessant = []
     }
 
     drawBoard(display) {
@@ -43,9 +43,18 @@ export class Board {
         element.appendChild(img)   
     }
 
-    move(p1, p2, display) {
+    move(p1, p2, display, enPessant) {
         this.position[p2[0]][p2[1]] = this.position[p1[0]][p1[1]]
         this.position[p1[0]][p1[1]] = ' '
+
+        if (this.enPessant.length != 0) if (this.enPessant[1] == this.next) this.enPessant = []
+        if (enPessant == 1) this.enPessant = [p2, this.next]
+        if (enPessant == 2) {
+            if (this.next == 'w')
+                this.position[p2[0]+1][p2[1]] = ' '
+            else
+                this.position[p2[0]-1][p2[1]] = ' '
+        }
 
         if (this.position[p2[0]][p2[1]] == 'K' && (p2[1] - p1[1]) == 2) {
             this.position[7][5] = this.position[7][7]
@@ -77,9 +86,43 @@ export class Board {
         else this.next = 'w'
     }
 
-    moveAux(p1, p2) {
+    moveAux(p1, p2, enPessant) {
+
         this.position[p2[0]][p2[1]] = this.position[p1[0]][p1[1]]
         this.position[p1[0]][p1[1]] = ' '
+
+        if (this.enPessant.length != 0) if (this.enPessant[1] == this.next) this.enPessant = []
+        if (enPessant == 1) this.enPessant = [p2, (this.color(this.position[p2[0]][p2[1]]) == 1 ? 'w':'b' )]
+        if (enPessant == 2) {
+            if (this.next == 'w')
+                this.position[p2[0]+1][p2[1]] = ' '
+            else
+                this.position[p2[0]-1][p2[1]] = ' '
+        }
+
+        if (this.position[p2[0]][p2[1]] == 'K' && (p2[1] - p1[1]) == 2) {
+            this.position[7][5] = this.position[7][7]
+            this.position[7][7] = ' '
+            this.castleWS = 0
+        }
+
+        if (this.position[p2[0]][p2[1]] == 'K' && (p1[1] - p2[1]) == 2) {
+            this.position[7][3] = this.position[7][0]
+            this.position[7][0] = ' '
+            this.castleWL = 0
+        }
+
+        if (this.position[p2[0]][p2[1]] == 'k' && (p2[1] - p1[1]) == 2) {
+            this.position[0][5] = this.position[0][7]
+            this.position[0][7] = ' '
+            this.castleBS = 0
+        }
+
+        if (this.position[p2[0]][p2[1]] == 'k' && (p1[1] - p2[1]) == 2) {
+            this.position[0][3] = this.position[0][0]
+            this.position[0][0] = ' '
+            this.castleBL = 0
+        }
 
         if (this.next == 'w') this.next = 'b'
         else this.next = 'w'
@@ -94,16 +137,20 @@ export class Board {
     getSuccesors(v) {
         var result = []
         var i
-
-        if (this.color(this.position[v[0]][v[1]]) == 1 && this.next == 'b') return []
-        if (this.color(this.position[v[0]][v[1]]) == 2 && this.next == 'w') return []
+        var c = this.color(this.position[v[0]][v[1]])
+        if (c == 1 && this.next == 'b') return []
+        if (c == 2 && this.next == 'w') return []
 
         switch(this.position[v[0]][v[1]]) {
             case 'P':
                 if (this.position[v[0]-1][v[1]] == ' ') {
                     result.push([[v[0]-1,v[1]], ' '])
-                    if (v[0] == 6 && this.position[v[0]-2][v[1]] == ' ')
-                        result.push([[v[0]-2,v[1]], ' '])
+                    if (v[0] == 6 && this.position[v[0]-2][v[1]] == ' ') {
+                        if (this.position[v[0]-2][v[1]+1] == 'p' || this.position[v[0]-2][v[1]-1] == 'p')
+                            result.push([[v[0]-2,v[1]], ' ', 1])
+                        else
+                            result.push([[v[0]-2,v[1]], ' '])
+                    }
                 }
                 if (v[0]-1>=0 && v[1]-1>=0)
                     if (this.color(this.position[v[0]-1][v[1]-1]) == 2)
@@ -111,6 +158,15 @@ export class Board {
                 if (v[0]-1>=0 && v[1]+1<=7)
                     if (this.color(this.position[v[0]-1][v[1]+1]) == 2)
                         result.push([[v[0]-1,v[1]+1], this.position[v[0]-1][v[1]+1]])
+                if (this.enPessant.length != 0) {
+                    if (v[0]-1>=0 && v[1]-1>=0)
+                        if (this.position[v[0]][v[1]-1] == 'p')
+                            result.push([[v[0]-1,v[1]-1], this.position[v[0]][v[1]-1], 2])
+                    if (v[0]-1>=0 && v[1]+1<=7)
+                        if (this.position[v[0]][v[1]+1] == 'p')
+                            result.push([[v[0]-1,v[1]+1], this.position[v[0]][v[1]+1], 2])
+                }
+                
                 
                 break
             
@@ -118,8 +174,12 @@ export class Board {
             case 'p':
                 if (this.position[v[0]+1][v[1]] == ' ') {
                     result.push([[v[0]+1,v[1]], ' '])
-                    if (v[0] == 1 && this.position[v[0]+2][v[1]] == ' ')
-                        result.push([[v[0]+2,v[1]], ' '])
+                    if (v[0] == 1 && this.position[v[0]+2][v[1]] == ' ') {
+                        if (this.position[v[0]+2][v[1]+1] == 'P' || this.position[v[0]+2][v[1]-1] == 'P')
+                            result.push([[v[0]+2,v[1]], ' ', 1])
+                        else
+                            result.push([[v[0]+2,v[1]], ' '])
+                    }
                 }
                 
                 if (v[0]+1<=7 && v[1]+1<=7)
@@ -128,6 +188,14 @@ export class Board {
                 if (v[0]+1<=7 && v[1]-1>=0)
                     if (this.color(this.position[v[0]+1][v[1]-1]) == 1)
                         result.push([[v[0]+1,v[1]-1], this.position[v[0]+1][v[1]-1]])
+                if (this.enPessant.length != 0) {
+                    if (v[0]+1>=0 && v[1]-1>=0)
+                        if (this.position[v[0]][v[1]-1] == 'P')
+                            result.push([[v[0]+1,v[1]-1], this.position[v[0]][v[1]-1], 2])
+                    if (v[0]+1>=0 && v[1]+1<=7)
+                        if (this.position[v[0]][v[1]+1] == 'P')
+                            result.push([[v[0]+1,v[1]+1], this.position[v[0]][v[1]+1], 2])
+                }
                 
                 break
 
@@ -412,13 +480,22 @@ export class Board {
         
         if (this.isAux == 0) {
             for (var ind in result) {
+
+                if (result[ind].length == 2)
+                    result[ind].push(0)
                 
                 for (var indk in this.position)
                     auxBoard.position[indk] = this.position[indk].slice()
-                
-                auxBoard.moveAux(v, result[ind][0])
+
+                auxBoard.moveAux(v, result[ind][0], result[ind][2])
                 if (this.next == 'w') auxBoard.next = 'b'
                 else auxBoard.next = 'w'
+                auxBoard.enPessant = this.enPessant.slice()
+                auxBoard.castleBL = this.castleBL
+                auxBoard.castleBS = this.castleBS
+                auxBoard.castleWL = this.castleWL
+                auxBoard.castleWS = this.castleWS
+
                 flag = 0
                 for (var i = 0; i < 8; i++) {
                     for (var j = 0; j < 8; j++) {
@@ -426,11 +503,11 @@ export class Board {
                         
                         if (((c == 1) && (auxBoard.next == 'w')) || ((c == 2) && (auxBoard.next == 'b'))) {
                             var checkSucc = auxBoard.getSuccesors([i, j])
-                            
                             for (var l in checkSucc) {
                                 
-                                if ((c == 1 && checkSucc[l][1] == 'k') || (c == 2 && checkSucc[l][1] == 'K'))
+                                if ((c == 1 && checkSucc[l][1] == 'k') || (c == 2 && checkSucc[l][1] == 'K')){
                                     flag = 1
+                                }
                                 
                             }
                         }
