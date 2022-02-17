@@ -498,7 +498,9 @@ export class Board {
 
                 flag = 0
                 for (var i = 0; i < 8; i++) {
+                    if (flag) break
                     for (var j = 0; j < 8; j++) {
+                        if (flag) break
                         var c = this.color(auxBoard.position[i][j])
                         
                         if (((c == 1) && (auxBoard.next == 'w')) || ((c == 2) && (auxBoard.next == 'b'))) {
@@ -507,12 +509,14 @@ export class Board {
                                 
                                 if ((c == 1 && checkSucc[l][1] == 'k') || (c == 2 && checkSucc[l][1] == 'K')){
                                     flag = 1
+                                    break
                                 }
                                 
                             }
                         }
                         
                     }
+
                 }
                 if (flag == 0)
                     final.push(result[ind])
