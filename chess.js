@@ -558,6 +558,7 @@ export class Board {
         var succ = []
         for (var i = 0; i < 8; i++) {
             for (var j = 0; j < 8; j++) {
+                if (this.color(this.position[i][j]) != (this.next == 'w' ? 1:2)) continue
                 succ = this.getSuccesors([i, j])
                 if (succ.length != 0) {
                     for (var k in succ) {
@@ -566,6 +567,25 @@ export class Board {
                 }
             }
         }
+        return all
+    }
+
+    getAllAuxSuccesors() {
+        var all = []
+        var succ = []
+        this.isAux = 1
+        for (var i = 0; i < 8; i++) {
+            for (var j = 0; j < 8; j++) {
+                if (this.color(this.position[i][j]) != (this.next == 'w' ? 1:2)) continue
+                succ = this.getSuccesors([i, j])
+                if (succ.length != 0) {
+                    for (var k in succ) {
+                        all.push([[i, j], succ[k][0], succ[k].slice()[2]])
+                    }
+                }
+            }
+        }
+        this.isAux = 0
         return all
     }
 

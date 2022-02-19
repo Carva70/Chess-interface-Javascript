@@ -8,6 +8,7 @@ board.drawBoard(display)
 var drag, drop
 
 var limit = 3
+var auxlimit = 2
 let quiesenceLimit = 1
 let nodosVisitados = 0
 
@@ -61,7 +62,7 @@ function mejormoviviento(board, limit) {
     if (board.next == 'b') {
         min = 9999
         for (var i in succ) {
-            copy = new Board(1, board)
+            copy = new Board(0, board)
             copy.move(succ[i][0], succ[i][1], null, succ[i][2])
             alpha = minimax(copy, 0, -99999, 99999, limit)
             
@@ -73,7 +74,7 @@ function mejormoviviento(board, limit) {
     } else {
         min = -9999
         for (var i in succ) {
-            copy = new Board(1, board)
+            copy = new Board(0, board)
             copy.move(succ[i][0], succ[i][1], null, succ[i][2])
             alpha = minimax(copy, 0, -99999, 99999, limit)
             
@@ -88,7 +89,9 @@ function mejormoviviento(board, limit) {
 
 
 function minimax(board, depth, alpha, beta, limit) {
-    var succ = board.getAllSuccesors()
+    var succ
+    if (limit > auxlimit) succ = board.getAllAuxSuccesors()
+    else succ = board.getAllSuccesors() 
     nodosVisitados += 1
 
     var i
